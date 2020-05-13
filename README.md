@@ -8,6 +8,7 @@ This extensions implements OpenPGP in VSCode, allowing you to encrypt and decryp
 - Create Private Keys
 - Encrypt with public keys
 - Decrypt with private key
+- Automatic selection of a matching private key based the encrypted message's signature
 
 ![VSCode OpenPGP](images/vscode-openpgp.gif)
 
