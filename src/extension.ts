@@ -58,9 +58,14 @@ export function activate(context: vscode.ExtensionContext) {
 
     (async () => {
       const encryptedText = vscode.window.activeTextEditor!.document.getText();
-      let encryptedMessage = await openpgp.message.readArmored(encryptedText);
+      let encryptedMessage:openpgp.message.Message = await openpgp.message.readArmored(encryptedText);
 
-      let privateKeyArmored = await pickPrivateKey();
+      let privateKeyArmored = await getMatchingPrivateKey(encryptedMessage);
+
+      if(privateKeyArmored === null){
+        privateKeyArmored = await pickPrivateKey();
+      }
+
 
       if (!privateKeyArmored.isDecrypted()) {
         const passString = await vscode.window.showInputBox({ 
@@ -111,8 +116,7 @@ async function getPublicKeys() {
     const readStr = Buffer.from(readData).toString('utf8');
 
     const key = await openpgp.key.readArmored(readStr);
-    console.info(key.keys[0].isPublic());
-
+    
     if (key.keys[0].isPublic()) {
       keys.push(key.keys[0]);
     }
@@ -137,6 +141,7 @@ async function getPrivateKeys() {
     const readStr = Buffer.from(readData).toString('utf8');
 
     const key:openpgp.key.KeyResult= await openpgp.key.readArmored(readStr);
+
     
     if (key.keys[0].isPrivate()) {
       keys.push(key.keys[0]);
@@ -194,8 +199,28 @@ async function pickPrivateKey() {
 }
 
 
+async function getMatchingPrivateKey(encryptedMessage:openpgp.message.Message) {
+  const keys = await getPrivateKeys();
+
+  for (let message_key of encryptedMessage.getEncryptionKeyIds()) {
+    const message_key_bytes = message_key.bytes;
+
+    for (let private_key of keys) {
+      for (let private_key_id of private_key.getKeyIds()){
+        if(private_key_id.bytes === message_key_bytes){
+          return private_key;
+        }
+      }
+    }
+  }
+
+  return null;
+}
+
+
 function getKeysFolderUri() {
   let keys_folder = ''+vscode.workspace.getConfiguration().get('openpgp-encrypt.encrypt.keysFolder');
   keys_folder = keys_folder.replace("${homeDir}", os.homedir());
   return vscode.Uri.file(keys_folder);
 }
+
