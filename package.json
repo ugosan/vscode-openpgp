@@ -23,7 +23,7 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
-		"commands": [
+    "commands": [
       {
         "command": "vscode-openpgp.generatePrivateKey",
         "title": "New Private Key...",
@@ -39,18 +39,18 @@
         "title": "Decrypt File",
         "category": "OpenPGP"
       }
-		],
-		"menus": {
-			"explorer/context": [
+    ],
+    "menus": {
+      "explorer/context": [
         {
-					"command": "vscode-openpgp.encrypt",
-					"group": "1_modification"
+          "command": "vscode-openpgp.encrypt",
+          "group": "1_modification"
         },
         {
-					"command": "vscode-openpgp.decrypt",
-					"group": "1_modification"
+          "command": "vscode-openpgp.decrypt",
+          "group": "1_modification"
         }
-			]
+      ]
     },
     "configuration": {
       "title": "OpenPGP",
@@ -58,27 +58,28 @@
         "openpgp-encrypt.encrypt.keysFolder": {
           "type": "string",
           "description": "Specifies the folder path where the private and public keys will be stored.",
-          "default": "~/vscode/keys"
+          "default": "${homeDir}/.vscode/openpgp-keys"
         }
       }
     }
-	},
+  },
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./",
+    "compile": "tsc -p ./ --module openpgp",
     "lint": "eslint src --ext ts",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
     "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
-    "@types/vscode": "^1.45.0",
     "@types/glob": "^7.1.1",
     "@types/mocha": "^7.0.2",
     "@types/node": "^13.11.0",
-    "eslint": "^6.8.0",
-    "@typescript-eslint/parser": "^2.30.0",
+    "@types/openpgp": "^4.4.11",
+    "@types/vscode": "^1.45.0",
     "@typescript-eslint/eslint-plugin": "^2.30.0",
+    "@typescript-eslint/parser": "^2.30.0",
+    "eslint": "^6.8.0",
     "glob": "^7.1.6",
     "mocha": "^7.1.2",
     "typescript": "^3.8.3",
