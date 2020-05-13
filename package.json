@@ -1,0 +1,90 @@
+{
+  "name": "vscode-openpgp",
+  "displayName": "vscode-openpgp",
+  "description": "OpenPGP Encryption support for VSCode",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.45.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "gpg",
+    "gnupg",
+    "pgp",
+    "encrypt",
+    "decrypt"
+  ],
+  "activationEvents": [
+    "onCommand:vscode-openpgp.generatePrivateKey",
+    "onCommand:vscode-openpgp.encrypt",
+    "onCommand:vscode-openpgp.decrypt"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+		"commands": [
+      {
+        "command": "vscode-openpgp.generatePrivateKey",
+        "title": "New Private Key...",
+        "category": "OpenPGP"
+      },
+      {
+        "command": "vscode-openpgp.encrypt",
+        "title": "Encrypt File",
+        "category": "OpenPGP"
+      },
+      {
+        "command": "vscode-openpgp.decrypt",
+        "title": "Decrypt File",
+        "category": "OpenPGP"
+      }
+		],
+		"menus": {
+			"explorer/context": [
+        {
+					"command": "vscode-openpgp.encrypt",
+					"group": "1_modification"
+        },
+        {
+					"command": "vscode-openpgp.decrypt",
+					"group": "1_modification"
+        }
+			]
+    },
+    "configuration": {
+      "title": "OpenPGP",
+      "properties": {
+        "openpgp-encrypt.encrypt.keysFolder": {
+          "type": "string",
+          "description": "Specifies the folder path where the private and public keys will be stored.",
+          "default": "~/vscode/keys"
+        }
+      }
+    }
+	},
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "lint": "eslint src --ext ts",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.45.0",
+    "@types/glob": "^7.1.1",
+    "@types/mocha": "^7.0.2",
+    "@types/node": "^13.11.0",
+    "eslint": "^6.8.0",
+    "@typescript-eslint/parser": "^2.30.0",
+    "@typescript-eslint/eslint-plugin": "^2.30.0",
+    "glob": "^7.1.6",
+    "mocha": "^7.1.2",
+    "typescript": "^3.8.3",
+    "vscode-test": "^1.3.0"
+  },
+  "dependencies": {
+    "openpgp": "4.10.4"
+  }
+}
