@@ -23,15 +23,10 @@ export function activate(context: vscode.ExtensionContext) {
         passphrase: inputs.passphrase
       });
 
-
       const filename = [inputs.name.replace(' ', ''), inputs.email, inputs.comment];
-
       let fileUri = folderUri.with({ path: posix.join(folderUri.path, filename.join('_') + '.key') });
-
       await vscode.workspace.fs.writeFile(fileUri, Buffer.from(privateKeyArmored, 'utf8'));
-
       vscode.window.showInformationMessage(`Private key generated to ${fileUri}`);
-
       fileUri = folderUri.with({ path: posix.join(folderUri.path, filename.join('_') + '.pub') });
       await vscode.workspace.fs.writeFile(fileUri, Buffer.from(publicKeyArmored, 'utf8'));
 
@@ -42,28 +37,46 @@ export function activate(context: vscode.ExtensionContext) {
 
     (async () => {
 
+
+      if(e){
+        var openPath = vscode.Uri.file(e.path);
+        vscode.workspace.openTextDocument(openPath).then(doc => {
+          vscode.window.showTextDocument(doc);
+        });
+      }
+
       const fullText = vscode.window.activeTextEditor!.document.getText();
-      let publicKey = await pickPublicKey();
-      let encrypted = await encryptWithPublicKey(fullText, publicKey);
-      let document = vscode.window.activeTextEditor!.document;
-      const invalidRange = new vscode.Range(0, 0, document.lineCount, 0);
-      const fullRange = document.validateRange(invalidRange);
-      vscode.window.activeTextEditor!.edit(edit => edit.replace(fullRange, encrypted));
+      const publicKey = await pickPublicKey();
+      const encrypted = await encryptWithPublicKey(fullText, publicKey);
+      replaceCurrentEditorContent(encrypted);
 
     })();
   }));
 
 
-  context.subscriptions.push(vscode.commands.registerCommand('vscode-openpgp.decrypt', () => {
+  context.subscriptions.push(vscode.commands.registerCommand('vscode-openpgp.decrypt', (e) => {
 
     (async () => {
-      const encryptedText = vscode.window.activeTextEditor!.document.getText();
-      let encryptedMessage:openpgp.message.Message = await openpgp.message.readArmored(encryptedText);
+      let encryptedText = vscode.window.activeTextEditor!.document.getText();
+
+      if(e){
+        var openPath = vscode.Uri.file(e.path);
+        const readData  = await vscode.workspace.fs.readFile(openPath);
+        encryptedText = Buffer.from(readData).toString('utf8');
+        vscode.workspace.openTextDocument(openPath).then(doc => {
+          vscode.window.showTextDocument(doc);
+        });
+        
+      }
+
+      const encryptedMessage:openpgp.message.Message = await openpgp.message.readArmored(encryptedText);
 
       let privateKeyArmored = await getMatchingPrivateKey(encryptedMessage);
 
       if(privateKeyArmored === null){
         privateKeyArmored = await pickPrivateKey();
+      }else{
+        vscode.window.showInformationMessage('Found matching private key!');
       }
 
 
@@ -87,11 +100,7 @@ export function activate(context: vscode.ExtensionContext) {
         privateKeys: [privateKeyArmored]
       });
 
-      let document = vscode.window.activeTextEditor!.document;
-
-      const invalidRange = new vscode.Range(0, 0, document.lineCount, 0);
-      const fullRange = document.validateRange(invalidRange);
-      vscode.window.activeTextEditor!.edit(edit => edit.replace(fullRange, decrypted));
+      replaceCurrentEditorContent(decrypted);
 
     })();
   }));
@@ -222,5 +231,12 @@ function getKeysFolderUri() {
   let keys_folder = ''+vscode.workspace.getConfiguration().get('openpgp-encrypt.encrypt.keysFolder');
   keys_folder = keys_folder.replace("${homeDir}", os.homedir());
   return vscode.Uri.file(keys_folder);
+}
+
+function replaceCurrentEditorContent(newText: string){
+  const document = vscode.window.activeTextEditor!.document;
+  const invalidRange = new vscode.Range(0, 0, document.lineCount, 0);
+  const fullRange = document.validateRange(invalidRange);
+  vscode.window.activeTextEditor!.edit(edit => edit.replace(fullRange, newText));
 }
 
