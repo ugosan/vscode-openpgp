@@ -18,7 +18,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 
       const { privateKeyArmored, publicKeyArmored, revocationCertificate } = await openpgp.generateKey({
-        userIds: [{ name: inputs.name, email: inputs.email, comment: inputs.comment }],
+        userIds: [{ name: inputs.name, email: inputs.email}],
         curve: 'ed25519',
         passphrase: inputs.passphrase
       });
@@ -58,6 +58,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     (async () => {
       let encryptedText = vscode.window.activeTextEditor!.document.getText();
+      vscode.window.showErrorMessage('AAAA');
 
       if(e){
         var openPath = vscode.Uri.file(e.path);
@@ -69,38 +70,43 @@ export function activate(context: vscode.ExtensionContext) {
         
       }
 
-      const encryptedMessage:openpgp.message.Message = await openpgp.message.readArmored(encryptedText);
+      try{
+        const encryptedMessage:openpgp.message.Message = await openpgp.message.readArmored(encryptedText);
+     
 
-      let privateKeyArmored = await getMatchingPrivateKey(encryptedMessage);
+        let privateKeyArmored = await getMatchingPrivateKey(encryptedMessage);
 
-      if(privateKeyArmored === null){
-        privateKeyArmored = await pickPrivateKey();
-      }else{
-        vscode.window.showInformationMessage('Found matching private key!');
-      }
+        if(privateKeyArmored === null){
+          privateKeyArmored = await pickPrivateKey();
+        }else{
+          vscode.window.showInformationMessage('Found matching private key!');
+        }
 
-
-      if (!privateKeyArmored.isDecrypted()) {
-        const passString = await vscode.window.showInputBox({ 
+        if (!privateKeyArmored.isDecrypted()) {
+          const passString = await vscode.window.showInputBox({ 
             prompt: 'Enter passphrase of the private key', 
             placeHolder: 'PASSPHRASE', 
             password: true, 
-            validateInput: value => (value.length == 0) ? "Passphrase cannot be empty" : null 
+            validateInput: value => (value.length === 0) ? "Passphrase cannot be empty" : null 
           });
 
-        try {
-          await privateKeyArmored.decrypt(passString!);
-        } catch (error) {
-          vscode.window.showErrorMessage('' + error);
+          try {
+            await privateKeyArmored.decrypt(passString!);
+          } catch (error) {
+            vscode.window.showErrorMessage('' + error);
+          }
         }
+
+        const { data: decrypted } = await openpgp.decrypt({
+          message: encryptedMessage,
+          privateKeys: [privateKeyArmored]
+        });
+
+        replaceCurrentEditorContent(decrypted);
+
+      }catch (error) {
+        vscode.window.showErrorMessage('' + error);
       }
-
-      const { data: decrypted } = await openpgp.decrypt({
-        message: encryptedMessage,
-        privateKeys: [privateKeyArmored]
-      });
-
-      replaceCurrentEditorContent(decrypted);
 
     })();
   }));
@@ -124,8 +130,12 @@ async function getPublicKeys() {
     const readData = await vscode.workspace.fs.readFile(fileUri);
     const readStr = Buffer.from(readData).toString('utf8');
 
+    console.info(readStr);
+
     const key = await openpgp.key.readArmored(readStr);
     
+    console.info(key);
+
     if (key.keys[0].isPublic()) {
       keys.push(key.keys[0]);
     }
@@ -175,7 +185,7 @@ async function pickPublicKey() {
   const result = await window.showQuickPick(keyList, {
     placeHolder: 'Pick a public key'
   });
-  return keys[result.id];
+  return keys[(result as any).id];
 }
 
 async function encryptWithPublicKey(text: string, publicKey: openpgp.key.Key) {
@@ -204,7 +214,7 @@ async function pickPrivateKey() {
   const result = await window.showQuickPick(keyList, {
     placeHolder: 'Pick a private key to decrypt'
   });
-  return keys[result.id];
+  return keys[(result as any).id];
 }
 
 
