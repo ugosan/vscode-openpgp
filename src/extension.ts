@@ -72,7 +72,6 @@ export function activate(context: vscode.ExtensionContext) {
 
       try{
         const encryptedMessage:openpgp.message.Message = await openpgp.message.readArmored(encryptedText);
-     
 
         let privateKeyArmored = await getMatchingPrivateKey(encryptedMessage);
 
@@ -217,7 +216,6 @@ async function pickPrivateKey() {
   return keys[(result as any).id];
 }
 
-
 async function getMatchingPrivateKey(encryptedMessage:openpgp.message.Message) {
   const keys = await getPrivateKeys();
 
@@ -236,7 +234,6 @@ async function getMatchingPrivateKey(encryptedMessage:openpgp.message.Message) {
   return null;
 }
 
-
 function getKeysFolderUri() {
   let keys_folder = ''+vscode.workspace.getConfiguration().get('openpgp-encrypt.encrypt.keysFolder');
   keys_folder = keys_folder.replace("${homeDir}", os.homedir());
@@ -249,4 +246,3 @@ function replaceCurrentEditorContent(newText: string){
   const fullRange = document.validateRange(invalidRange);
   vscode.window.activeTextEditor!.edit(edit => edit.replace(fullRange, newText));
 }
-

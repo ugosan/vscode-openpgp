@@ -82,7 +82,7 @@ module.exports =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 0);
+/******/ 	return __webpack_require__(__webpack_require__.s = "./src/extension.ts");
 /******/ })
 /************************************************************************/
 /******/ ({
@@ -44323,19 +44323,6 @@ class MultiStepInput {
         });
     }
 }
-
-
-/***/ }),
-
-/***/ 0:
-/*!********************************************************!*\
-  !*** multi ./src/extension.ts ./src/multiStepInput.ts ***!
-  \********************************************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-__webpack_require__(/*! ./src/extension.ts */"./src/extension.ts");
-module.exports = __webpack_require__(/*! ./src/multiStepInput.ts */"./src/multiStepInput.ts");
 
 
 /***/ }),
