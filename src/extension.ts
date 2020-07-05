@@ -18,7 +18,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 
       const { privateKeyArmored, publicKeyArmored, revocationCertificate } = await openpgp.generateKey({
-        userIds: [{ name: inputs.name, email: inputs.email}],
+        userIds: [{ name: inputs.name, email: inputs.email }],
         curve: 'ed25519',
         passphrase: inputs.passphrase
       });
