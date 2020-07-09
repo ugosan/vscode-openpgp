@@ -16,7 +16,6 @@ export function activate(context: vscode.ExtensionContext) {
       
       const inputs = await collectNewPrivateKey();
 
-
       const { privateKeyArmored, publicKeyArmored, revocationCertificate } = await openpgp.generateKey({
         userIds: [{ name: inputs.name, email: inputs.email }],
         curve: 'ed25519',
@@ -36,7 +35,6 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(vscode.commands.registerCommand('vscode-openpgp.encrypt', (e) => {
 
     (async () => {
-
 
       if(e){
         var openPath = vscode.Uri.file(e.path);
@@ -58,8 +56,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     (async () => {
       let encryptedText = vscode.window.activeTextEditor!.document.getText();
-      vscode.window.showErrorMessage('AAAA');
-
+      
       if(e){
         var openPath = vscode.Uri.file(e.path);
         const readData  = await vscode.workspace.fs.readFile(openPath);
@@ -70,21 +67,24 @@ export function activate(context: vscode.ExtensionContext) {
         
       }
 
+
       try{
         const encryptedMessage:openpgp.message.Message = await openpgp.message.readArmored(encryptedText);
 
         let privateKeyArmored = await getMatchingPrivateKey(encryptedMessage);
-
+        console.info(privateKeyArmored?.getUserIds());
         if(privateKeyArmored === null){
           privateKeyArmored = await pickPrivateKey();
         }else{
-          vscode.window.showInformationMessage('Found matching private key!');
+          vscode.window.setStatusBarMessage('Found matching private key ! ', 4000);
         }
+
+        
 
         if (!privateKeyArmored.isDecrypted()) {
           const passString = await vscode.window.showInputBox({ 
-            prompt: 'Enter passphrase of the private key', 
-            placeHolder: 'PASSPHRASE', 
+            prompt: 'Passphrase for ['+privateKeyArmored?.getUserIds()[0]+']', 
+            placeHolder: 'Enter passphrase...', 
             password: true, 
             validateInput: value => (value.length === 0) ? "Passphrase cannot be empty" : null 
           });

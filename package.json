@@ -14,7 +14,7 @@
   },
   "homepage": "https://github.com/ugosan/vscode-openpgp",
   "engines": {
-    "vscode": "^1.46.0"
+    "vscode": "^1.44.0"
   },
   "categories": [
     "Other"
@@ -76,10 +76,12 @@
     }
   },
   "scripts": {
-		"vscode:prepublish": "npm run compile",
-		"compile": "tsc -p ./",
-		"lint": "eslint . --ext .ts,.tsx",
-		"watch": "tsc -watch -p ./"
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "lint": "eslint src --ext ts",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
     "@types/glob": "^7.1.1",
