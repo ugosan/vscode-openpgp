@@ -14,7 +14,7 @@
   },
   "homepage": "https://github.com/ugosan/vscode-openpgp",
   "engines": {
-    "vscode": "^1.44.0"
+    "vscode": "^1.46.0"
   },
   "categories": [
     "Other"
@@ -103,6 +103,6 @@
     "webpack-cli": "^3.3.11"
   },
   "dependencies": {
-    "openpgp": "4.10.4"
+    "openpgp": "4.10.9"
   }
 }
