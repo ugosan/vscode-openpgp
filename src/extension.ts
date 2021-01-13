@@ -110,6 +110,8 @@ export function activate(context: vscode.ExtensionContext) {
     })();
   }));
 
+
+  
 }
 
 // this method is called when your extension is deactivated
@@ -127,13 +129,15 @@ async function getPublicKeys() {
 
     const fileUri = folderUri.with({ path: posix.join(folderUri.path, element[0]) });
     const readData = await vscode.workspace.fs.readFile(fileUri);
+
+    
     const readStr = Buffer.from(readData).toString('utf8');
 
     console.info(readStr);
 
     const key = await openpgp.key.readArmored(readStr);
     
-    console.info(key);
+    console.info('key: ', JSON.stringify(key));
 
     if (key.keys[0].isPublic()) {
       keys.push(key.keys[0]);
@@ -191,10 +195,12 @@ async function encryptWithPublicKey(text: string, publicKey: openpgp.key.Key) {
 
   let msg = openpgp.message.fromText(text);
 
-  const { data: encrypted } = await openpgp.encrypt({
+  let { data: encrypted } = await openpgp.encrypt({
     message: msg,
     publicKeys: publicKey
   });
+
+  encrypted = encrypted.replace("Comment: https://openpgpjs.org", "Comment: This file was encrypted using vscode-openpgp \n(https://vscode-openpgp.ugosan.org) and OpenPGP.js \n(https://openpgpjs.org)")
 
   return encrypted;
 }
