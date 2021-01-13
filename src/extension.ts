@@ -72,7 +72,7 @@ export function activate(context: vscode.ExtensionContext) {
         const encryptedMessage:openpgp.message.Message = await openpgp.message.readArmored(encryptedText);
 
         let privateKeyArmored = await getMatchingPrivateKey(encryptedMessage);
-        console.info(privateKeyArmored?.getUserIds());
+        //console.info(privateKeyArmored?.getUserIds());
         if(privateKeyArmored === null){
           privateKeyArmored = await pickPrivateKey();
         }else{
@@ -133,11 +133,11 @@ async function getPublicKeys() {
     
     const readStr = Buffer.from(readData).toString('utf8');
 
-    console.info(readStr);
+    //console.info(readStr);
 
     const key = await openpgp.key.readArmored(readStr);
     
-    console.info('key: ', JSON.stringify(key));
+    //console.info('key: ', JSON.stringify(key));
 
     if (key.keys[0].isPublic()) {
       keys.push(key.keys[0]);
@@ -200,7 +200,7 @@ async function encryptWithPublicKey(text: string, publicKey: openpgp.key.Key) {
     publicKeys: publicKey
   });
 
-  encrypted = encrypted.replace("Comment: https://openpgpjs.org", "Comment: This file was encrypted using vscode-openpgp \n(https://vscode-openpgp.ugosan.org) and OpenPGP.js \n(https://openpgpjs.org)")
+  encrypted = encrypted.replace("Comment: https://openpgpjs.org", "Comment: This file was encrypted using vscode-openpgp \n(http://vscode-openpgp.ugosan.org) and OpenPGP.js \n(https://openpgpjs.org)")
 
   return encrypted;
 }
