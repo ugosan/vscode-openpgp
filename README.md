@@ -19,6 +19,7 @@ No requirements! OpenPGP uses [OpenPGP.js](https://openpgpjs.org/) from ProtonMa
 ### 0.0.5
 
 - Bump OpenPGP.js v4.10.9
+- Comment fix
 
 ### 0.0.4
 
