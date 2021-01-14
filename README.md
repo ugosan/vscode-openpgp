@@ -16,6 +16,12 @@ This extensions implements OpenPGP in VSCode, allowing you to encrypt and decryp
 
 No requirements! OpenPGP uses [OpenPGP.js](https://openpgpjs.org/) from ProtonMail.
 
+
+### 0.0.7
+
+- packaging fix 
+
+
 ### 0.0.5
 
 - Bump OpenPGP.js v4.10.9
