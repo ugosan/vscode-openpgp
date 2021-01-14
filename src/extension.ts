@@ -14,13 +14,20 @@ export class OutlineProvider
   }
 
   getTreeItem(item: any): vscode.TreeItem {
-    return new vscode.TreeItem(
+    let treeitem = new vscode.TreeItem(
       item.label,
       item.children.length > 0
         ? vscode.TreeItemCollapsibleState.Collapsed
         : vscode.TreeItemCollapsibleState.None
     );
+
+    treeitem.tooltip = item.label;
+    
+    treeitem.iconPath = new vscode.ThemeIcon(item.iconName);
+    return treeitem;
   }
+
+  
 
   getChildren(element?: any): Thenable<[]> {
     if (element) {
@@ -153,7 +160,7 @@ async function refreshActivityBar() {
   const privateKeyList: vscode.QuickPickItem[] = privateKeys.map((key, i) => {
     return {
       label: key.getUserIds()[0],
-      icon: "/aa",
+      iconName: "key",
       children: [
         {
           label: key.getFingerprint(),
@@ -174,6 +181,7 @@ async function refreshActivityBar() {
   const publicKeyList: vscode.QuickPickItem[] = publicKeys.map((key, i) => {
     return {
       label: key.getUserIds()[0],
+      iconName: "broadcast",
       children: [
         {
           label: key.getFingerprint(),
