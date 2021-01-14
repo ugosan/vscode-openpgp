@@ -31,7 +31,8 @@
   "activationEvents": [
     "onCommand:vscode-openpgp.generatePrivateKey",
     "onCommand:vscode-openpgp.encrypt",
-    "onCommand:vscode-openpgp.decrypt"
+    "onCommand:vscode-openpgp.decrypt",
+    "onView:private-keys"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -73,7 +74,28 @@
           "default": "${homeDir}/.vscode/openpgp-keys"
         }
       }
-    }
+    },
+    "viewsContainers": {
+      "activitybar": [
+          {
+              "id": "openpgp",
+              "title": "OpenPGP",
+              "icon": "images/activity-bar-icon.svg"
+          }
+      ]
+  },
+  "views": {
+      "openpgp": [
+          {
+              "id": "private-keys",
+              "name": "Private Keys"
+          },
+          {
+              "id": "public-keys",
+              "name": "Public Keys"
+          }
+      ]
+  }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

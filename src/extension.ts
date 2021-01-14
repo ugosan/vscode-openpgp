@@ -5,7 +5,36 @@ import { collectNewPrivateKey } from './multiStepInput';
 import { window } from 'vscode';
 const os = require('os');
 
+
+
+export class OutlineProvider
+  implements vscode.TreeDataProvider<any> {
+  constructor(private outline: any) {
+    console.log(outline);
+  }
+
+  getTreeItem(item: any): vscode.TreeItem {
+    return new vscode.TreeItem(
+      item.label,
+      item.children.length > 0
+        ? vscode.TreeItemCollapsibleState.Collapsed
+        : vscode.TreeItemCollapsibleState.None
+    );
+  }
+
+  getChildren(element?: any): Thenable<[]> {
+    if (element) {
+      return Promise.resolve(element.children);
+    } else {
+      return Promise.resolve(this.outline);
+    }
+  }
+}
+
 export function activate(context: vscode.ExtensionContext) {
+
+  refreshActivityBar();
+
 
   context.subscriptions.push(vscode.commands.registerCommand('vscode-openpgp.generatePrivateKey', () => {
 
@@ -117,6 +146,51 @@ export function activate(context: vscode.ExtensionContext) {
 // this method is called when your extension is deactivated
 export function deactivate() { }
 
+async function refreshActivityBar() {
+
+  const privateKeys = await getPrivateKeys();
+
+  const privateKeyList: vscode.QuickPickItem[] = privateKeys.map((key, i) => {
+    return {
+      label: key.getUserIds()[0],
+      icon: "/aa",
+      children: [
+        {
+          label: key.getFingerprint(),
+          children: [],
+        },
+      ]
+    };
+  });
+
+  
+  vscode.window.registerTreeDataProvider(
+    "private-keys",
+    new OutlineProvider(privateKeyList)
+  );
+
+  const publicKeys = await getPublicKeys();
+
+  const publicKeyList: vscode.QuickPickItem[] = publicKeys.map((key, i) => {
+    return {
+      label: key.getUserIds()[0],
+      children: [
+        {
+          label: key.getFingerprint(),
+          children: [],
+        },
+      ]
+    };
+  });
+
+  
+  vscode.window.registerTreeDataProvider(
+    "public-keys",
+    new OutlineProvider(publicKeyList)
+  );
+
+  
+}
 
 async function getPublicKeys() {
 
@@ -164,7 +238,6 @@ async function getPrivateKeys() {
 
     const key:openpgp.key.KeyResult= await openpgp.key.readArmored(readStr);
 
-    
     if (key.keys[0].isPrivate()) {
       keys.push(key.keys[0]);
     }
