@@ -32,15 +32,38 @@
     "onCommand:vscode-openpgp.generatePrivateKey",
     "onCommand:vscode-openpgp.encrypt",
     "onCommand:vscode-openpgp.decrypt",
-    "onView:private-keys"
+    "onView:vscode-openpgp.privateKeysView",
+    "onView:vscode-openpgp.publicKeysView"
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "openpgp",
+          "title": "OpenPGP",
+          "icon": "images/activity-bar-icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "openpgp": [
+        {
+          "id": "vscode-openpgp.privateKeysView",
+          "name": "Private Keys"
+        },
+        {
+          "id": "vscode-openpgp.publicKeysView",
+          "name": "Public Keys"
+        }
+      ]
+    },
     "commands": [
       {
         "command": "vscode-openpgp.generatePrivateKey",
         "title": "New Private Key...",
-        "category": "OpenPGP"
+        "category": "OpenPGP",
+        "icon": "$(add)"
       },
       {
         "command": "vscode-openpgp.encrypt",
@@ -51,9 +74,43 @@
         "command": "vscode-openpgp.decrypt",
         "title": "Decrypt File ...",
         "category": "OpenPGP"
+      },
+      {
+        "command": "vscode-openpgp.privateKeysView.openkey",
+        "title": "Open Key"
+      }, 	
+      {
+        "command": "vscode-openpgp.refreshKeys",
+        "title": "Refresh",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "vscode-openpgp.importKey",
+        "title": "Import Key",
+        "icon": "$(cloud-download)"
       }
     ],
     "menus": {
+      "view/title": [
+				{
+					"command": "vscode-openpgp.refreshKeys",
+					"when": "view == vscode-openpgp.privateKeysView || view == vscode-openpgp.publicKeysView",
+          "group": "navigation"
+        },
+        {
+					"command": "vscode-openpgp.generatePrivateKey",
+					"when": "view == vscode-openpgp.privateKeysView",
+          "group": "navigation"
+        },
+        {
+					"command": "vscode-openpgp.importKey",
+					"when": "view == vscode-openpgp.publicKeysView",
+          "group": "navigation"
+        }
+			],
+      "commandPalette": [
+        
+      ],
       "explorer/context": [
         {
           "command": "vscode-openpgp.encrypt",
@@ -74,28 +131,7 @@
           "default": "${homeDir}/.vscode/openpgp-keys"
         }
       }
-    },
-    "viewsContainers": {
-      "activitybar": [
-          {
-              "id": "openpgp",
-              "title": "OpenPGP",
-              "icon": "images/activity-bar-icon.svg"
-          }
-      ]
-  },
-  "views": {
-      "openpgp": [
-          {
-              "id": "private-keys",
-              "name": "Private Keys"
-          },
-          {
-              "id": "public-keys",
-              "name": "Public Keys"
-          }
-      ]
-  }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

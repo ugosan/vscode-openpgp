@@ -24,6 +24,11 @@ export class OutlineProvider
     treeitem.tooltip = item.label;
     
     treeitem.iconPath = new vscode.ThemeIcon(item.iconName);
+
+    treeitem.command = {
+      title: 'Restart Website',
+      command: "vscode.window.showTextDocument"
+    }
     return treeitem;
   }
 
@@ -65,6 +70,7 @@ export function activate(context: vscode.ExtensionContext) {
       fileUri = folderUri.with({ path: posix.join(folderUri.path, filename.join('_') + '.pub') });
       await vscode.workspace.fs.writeFile(fileUri, Buffer.from(publicKeyArmored, 'utf8'));
 
+      refreshActivityBar();
     })();
   }));
 
@@ -87,6 +93,21 @@ export function activate(context: vscode.ExtensionContext) {
     })();
   }));
 
+  context.subscriptions.push(vscode.commands.registerCommand('vscode-openpgp.openkey', (e) => {
+    console.info(e);
+    if(e){
+      var openPath = vscode.Uri.file(e.path);
+      vscode.workspace.openTextDocument(openPath).then(doc => {
+        vscode.window.showTextDocument(doc);
+      });
+    }
+  }));
+
+  context.subscriptions.push(vscode.commands.registerCommand('vscode-openpgp.refreshKeys', (e) => {
+    refreshActivityBar();
+  }));
+
+  
 
   context.subscriptions.push(vscode.commands.registerCommand('vscode-openpgp.decrypt', (e) => {
 
@@ -155,49 +176,74 @@ export function deactivate() { }
 
 async function refreshActivityBar() {
 
-  const privateKeys = await getPrivateKeys();
+  const keys = await getKeys();
+  let privateKeyList: any[] = [];
+  let publicKeyList: any[] = [];
 
-  const privateKeyList: vscode.QuickPickItem[] = privateKeys.map((key, i) => {
-    return {
-      label: key.getUserIds()[0],
-      iconName: "key",
-      children: [
-        {
-          label: key.getFingerprint(),
-          children: [],
-        },
-      ]
-    };
-  });
-
+  for (let key of keys) {
+    if(key.key.isPrivate()){
+      privateKeyList.push({
+        label: key.key.getUserIds()[0],
+        iconName: "key",
+        path: key.filePath,
+        children: [
+          {
+            label: key.key.getFingerprint().toUpperCase(),
+            iconName: "shield",
+            children: []
+          },
+        ]
+      })
+    }else{
+      publicKeyList.push({
+        label: key.key.getUserIds()[0],
+        iconName: "broadcast",
+        path: key.filePath,
+        children: [
+          {
+            label: key.key.getFingerprint().toUpperCase(),
+            iconName: "shield",
+            children: []
+          },
+        ]
+      });
+    }
   
+  }
+
   vscode.window.registerTreeDataProvider(
-    "private-keys",
+    "vscode-openpgp.privateKeysView",
     new OutlineProvider(privateKeyList)
   );
 
-  const publicKeys = await getPublicKeys();
-
-  const publicKeyList: vscode.QuickPickItem[] = publicKeys.map((key, i) => {
-    return {
-      label: key.getUserIds()[0],
-      iconName: "broadcast",
-      children: [
-        {
-          label: key.getFingerprint(),
-          children: [],
-        },
-      ]
-    };
-  });
-
-  
   vscode.window.registerTreeDataProvider(
-    "public-keys",
+    "vscode-openpgp.publicKeysView",
     new OutlineProvider(publicKeyList)
   );
 
-  
+}
+
+async function getKeys() {
+
+  const folderUri = getKeysFolderUri();
+  const keys_folder = await vscode.workspace.fs.readDirectory(folderUri);
+
+  let allKeys = [];
+
+  for await (let element of keys_folder) {
+
+    const fileUri = folderUri.with({ path: posix.join(folderUri.path, element[0]) });
+    const readData = await vscode.workspace.fs.readFile(fileUri);
+
+    const readStr = Buffer.from(readData).toString('utf8');
+
+    const key = await openpgp.key.readArmored(readStr);
+    
+    allKeys.push({key: key.keys[0], filePath: fileUri});
+
+  }
+
+  return allKeys;
 }
 
 async function getPublicKeys() {
