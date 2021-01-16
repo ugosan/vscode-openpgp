@@ -10,7 +10,7 @@ const os = require('os');
 export class OutlineProvider
   implements vscode.TreeDataProvider<any> {
   constructor(private outline: any) {
-    console.log(outline);
+    //console.log(outline);
   }
 
   getTreeItem(item: any): vscode.TreeItem {
