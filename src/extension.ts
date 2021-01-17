@@ -327,7 +327,7 @@ async function encryptWithPublicKey(text: string, publicKey: openpgp.key.Key) {
     publicKeys: publicKey
   });
 
-  encrypted = encrypted.replace("Comment: https://openpgpjs.org", "Comment: vscode-openpgp (http://vscode-openpgp.ugosan.org)")
+  encrypted = encrypted.replace("Comment: https://openpgpjs.org", "Comment: https://openpgpjs.org\nComment: Encrypted using vscode-openpgp (http://vscode-openpgp.ugosan.org)")
 
   return encrypted;
 }
