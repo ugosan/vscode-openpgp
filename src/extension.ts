@@ -26,8 +26,8 @@ export class OutlineProvider
     treeitem.iconPath = new vscode.ThemeIcon(item.iconName);
 
     treeitem.command = {
-      title: 'Restart Website',
-      command: "vscode.window.showTextDocument"
+      title: 'Open',
+      command: "vscode-openpgp.openKey"
     }
     return treeitem;
   }
@@ -93,7 +93,7 @@ export function activate(context: vscode.ExtensionContext) {
     })();
   }));
 
-  context.subscriptions.push(vscode.commands.registerCommand('vscode-openpgp.openkey', (e) => {
+  context.subscriptions.push(vscode.commands.registerCommand('vscode-openpgp.openKey', (e) => {
     console.info(e);
     if(e){
       var openPath = vscode.Uri.file(e.path);

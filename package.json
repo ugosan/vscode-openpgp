@@ -88,6 +88,21 @@
         "command": "vscode-openpgp.importKey",
         "title": "Import Key",
         "icon": "$(cloud-download)"
+      },
+      {
+        "command": "vscode-openpgp.removeKey",
+        "title": "Remove Key",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "vscode-openpgp.publishKey",
+        "title": "Publish Key",
+        "icon": "$(cloud-upload)"
+      },
+      {
+        "command": "vscode-openpgp.openKey",
+        "title": "Open Key",
+        "icon": "$(go-to-file)"
       }
     ],
     "menus": {
@@ -118,7 +133,24 @@
           "command": "vscode-openpgp.decrypt",
           "group": "1_modification"
         }
-      ]
+      ],
+      "view/item/context": [
+				{
+					"command": "vscode-openpgp.publishKey",
+					"when": "view == vscode-openpgp.publicKeysView",
+					"group": "inline"
+        },
+        {
+					"command": "vscode-openpgp.removeKey",
+					"when": "view == vscode-openpgp.publicKeysView || view == vscode-openpgp.privateKeysView",
+					"group": "inline"
+        },
+        {
+					"command": "vscode-openpgp.openKey",
+					"when": "view == vscode-openpgp.publicKeysView || view == vscode-openpgp.privateKeysView",
+					"group": "inline"
+				}
+			]
     },
     "configuration": {
       "title": "OpenPGP",
