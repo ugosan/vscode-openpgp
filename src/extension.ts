@@ -24,11 +24,8 @@ export class OutlineProvider
     treeitem.tooltip = item.label;
     
     treeitem.iconPath = new vscode.ThemeIcon(item.iconName);
+    treeitem.contextValue = item.contextValue;
 
-    treeitem.command = {
-      title: 'Open',
-      command: "vscode-openpgp.openKey"
-    }
     return treeitem;
   }
 
@@ -95,8 +92,8 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(vscode.commands.registerCommand('vscode-openpgp.openKey', (e) => {
     console.info(e);
-    if(e){
-      var openPath = vscode.Uri.file(e.path);
+    if(e.path){
+      var openPath = vscode.Uri.file(e.path.path);
       vscode.workspace.openTextDocument(openPath).then(doc => {
         vscode.window.showTextDocument(doc);
       });
@@ -185,11 +182,13 @@ async function refreshActivityBar() {
       privateKeyList.push({
         label: key.key.getUserIds()[0],
         iconName: "key",
+        contextValue: "privateKey",
         path: key.filePath,
         children: [
           {
             label: key.key.getFingerprint().toUpperCase(),
             iconName: "shield",
+            contextValue: "fingerprint",
             children: []
           },
         ]
@@ -199,10 +198,12 @@ async function refreshActivityBar() {
         label: key.key.getUserIds()[0],
         iconName: "broadcast",
         path: key.filePath,
+        contextValue: "publicKey",
         children: [
           {
             label: key.key.getFingerprint().toUpperCase(),
             iconName: "shield",
+            contextValue: "fingerprint",
             children: []
           },
         ]

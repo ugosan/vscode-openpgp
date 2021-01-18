@@ -137,17 +137,17 @@
       "view/item/context": [
 				{
 					"command": "vscode-openpgp.publishKey",
-					"when": "view == vscode-openpgp.publicKeysView",
+					"when": "viewItem == publicKey",
 					"group": "inline"
         },
         {
 					"command": "vscode-openpgp.removeKey",
-					"when": "view == vscode-openpgp.publicKeysView || view == vscode-openpgp.privateKeysView",
+					"when": "viewItem == privateKey || viewItem == publicKey",
 					"group": "inline"
         },
         {
 					"command": "vscode-openpgp.openKey",
-					"when": "view == vscode-openpgp.publicKeysView || view == vscode-openpgp.privateKeysView",
+					"when": "viewItem == privateKey || viewItem == publicKey",
 					"group": "inline"
 				}
 			]
