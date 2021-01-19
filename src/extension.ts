@@ -100,9 +100,55 @@ export function activate(context: vscode.ExtensionContext) {
     }
   }));
 
+  context.subscriptions.push(vscode.commands.registerCommand('vscode-openpgp.importKey', (e) => {
+    console.info(e);
+    (async () => {
+      
+    })();
+  }));
+
+  context.subscriptions.push(vscode.commands.registerCommand('vscode-openpgp.publishKey', (e) => {
+
+    (async () => {
+    console.info(e);
+    if(e.path){
+
+      var openPath = vscode.Uri.file(e.path.path);
+      const readData  = await vscode.workspace.fs.readFile(openPath);
+      var publicKey = Buffer.from(readData).toString('utf8');
+
+      console.info(publicKey);
+
+      var hkp = new openpgp.HKP('https://keyserver.ubuntu.com');
+
+
+      hkp.upload(publicKey).then(function() { 
+        vscode.window.showInformationMessage(`Private key published to https://keyserver.ubuntu.com`);
+      });
+
+    }
+    })();
+  }));
+
   context.subscriptions.push(vscode.commands.registerCommand('vscode-openpgp.refreshKeys', (e) => {
     refreshActivityBar();
   }));
+
+  context.subscriptions.push(vscode.commands.registerCommand('vscode-openpgp.removeKey', (e) => {
+
+    (async () => {
+      var choice = await vscode.window.showInformationMessage(`Do you want to remove or remove ${e.label}`, "Yes", "Cancel");
+      if(choice == 'Yes'){
+        var revoke = await vscode.window.showInformationMessage(`Do you want to also revoke the key? This will unpublish the key if its currently published.`, "Just delete", "Delete and Revoke", "Cancel");
+
+        
+        console.info(revoke);
+      }
+      console.info(choice);
+    })();
+  }));
+
+  
 
   
 

@@ -135,22 +135,22 @@
         }
       ],
       "view/item/context": [
-				{
-					"command": "vscode-openpgp.publishKey",
-					"when": "viewItem == publicKey",
-					"group": "inline"
+        {
+          "command": "vscode-openpgp.publishKey",
+          "when": "viewItem == publicKey",
+          "group": "inline"
         },
         {
-					"command": "vscode-openpgp.removeKey",
-					"when": "viewItem == privateKey || viewItem == publicKey",
-					"group": "inline"
+          "command": "vscode-openpgp.removeKey",
+          "when": "viewItem == privateKey || viewItem == publicKey",
+          "group": "inline"
         },
         {
-					"command": "vscode-openpgp.openKey",
-					"when": "viewItem == privateKey || viewItem == publicKey",
-					"group": "inline"
-				}
-			]
+          "command": "vscode-openpgp.openKey",
+          "when": "viewItem == privateKey || viewItem == publicKey",
+          "group": "inline"
+        }
+      ]
     },
     "configuration": {
       "title": "OpenPGP",
@@ -172,7 +172,7 @@
     "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
-    "@types/openpgp": "^4.4.11",
+    "@types/openpgp": "^4.4.14",
     "@types/vscode": "^1.50.0",
     "ts-loader": "^7.0.5",
     "tslint": "^6.1.2",
