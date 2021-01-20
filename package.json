@@ -1,6 +1,6 @@
 {
   "name": "vscode-openpgp",
-  "displayName": "vscode-openpgp",
+  "displayName": "OpenPGP Encryption",
   "description": "OpenPGP Encryption support for VSCode",
   "version": "0.0.7",
   "repository": {
@@ -26,7 +26,9 @@
     "pgp",
     "encrypt",
     "decrypt",
-    "secure"
+    "secure",
+    "secrets",
+    "cypher"
   ],
   "activationEvents": [
     "onCommand:vscode-openpgp.generatePrivateKey",
@@ -172,7 +174,7 @@
     "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
-    "@types/openpgp": "^4.4.14",
+    "@types/openpgp": "^4.4.15",
     "@types/vscode": "^1.50.0",
     "ts-loader": "^7.0.5",
     "tslint": "^6.1.2",

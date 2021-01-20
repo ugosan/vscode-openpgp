@@ -101,16 +101,48 @@ export function activate(context: vscode.ExtensionContext) {
   }));
 
   context.subscriptions.push(vscode.commands.registerCommand('vscode-openpgp.importKey', (e) => {
-    console.info(e);
+    
     (async () => {
+
+      const query = await vscode.window.showInputBox({ 
+            prompt: 'Enter the email address', 
+            placeHolder: 'someone@email.com', 
+            password: false, 
+            validateInput: value => (value.length === 0) ? "Query should not be empty" : null 
+          });
+
+
+      var hkp = new openpgp.HKP('https://keyserver.ubuntu.com');
       
+      var result = await hkp.lookup({query: query});
+
+      console.info(result);
+
+      if(!result){
+        vscode.window.showWarningMessage(`Could not find a public key for "${query}" at https://keyserver.ubuntu.com`);
+        return;
+      }
+
+      const key = await openpgp.key.readArmored(Buffer.from(result).toString('utf8'));
+
+      let filename = key.keys[0].getFingerprint();
+
+      const folderUri = getKeysFolderUri();
+      await vscode.workspace.fs.createDirectory(folderUri);
+      
+      let fileUri = folderUri.with({ path: posix.join(folderUri.path, filename + '.pub') });
+
+      await vscode.workspace.fs.writeFile(fileUri, Buffer.from(result, 'utf8'));
+
+      refreshActivityBar();
+
     })();
   }));
 
   context.subscriptions.push(vscode.commands.registerCommand('vscode-openpgp.publishKey', (e) => {
 
     (async () => {
-    console.info(e);
+
     if(e.path){
 
       var openPath = vscode.Uri.file(e.path.path);
@@ -123,7 +155,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 
       hkp.upload(publicKey).then(function() { 
-        vscode.window.showInformationMessage(`Private key published to https://keyserver.ubuntu.com`);
+        vscode.window.showInformationMessage(`Public key published to https://keyserver.ubuntu.com`);
       });
 
     }
@@ -137,11 +169,18 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(vscode.commands.registerCommand('vscode-openpgp.removeKey', (e) => {
 
     (async () => {
-      var choice = await vscode.window.showInformationMessage(`Do you want to remove or remove ${e.label}`, "Yes", "Cancel");
+      var choice = await vscode.window.showInformationMessage(`Do you want to remove ${e.label}`, "Yes", "Cancel");
       if(choice == 'Yes'){
         var revoke = await vscode.window.showInformationMessage(`Do you want to also revoke the key? This will unpublish the key if its currently published.`, "Just delete", "Delete and Revoke", "Cancel");
 
-        
+        if(revoke == 'Just delete'){
+          var filePath = vscode.Uri.file(e.path.path);
+          await vscode.workspace.fs.delete(filePath);
+          refreshActivityBar();
+          vscode.window.showInformationMessage(`Deleted successfully`);
+        }
+
+
         console.info(revoke);
       }
       console.info(choice);
@@ -305,7 +344,6 @@ async function getPublicKeys() {
     const fileUri = folderUri.with({ path: posix.join(folderUri.path, element[0]) });
     const readData = await vscode.workspace.fs.readFile(fileUri);
 
-    
     const readStr = Buffer.from(readData).toString('utf8');
 
     //console.info(readStr);
