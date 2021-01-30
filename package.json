@@ -87,9 +87,9 @@
         "icon": "$(refresh)"
       },
       {
-        "command": "vscode-openpgp.importKey",
-        "title": "Import Key",
-        "icon": "$(cloud-download)"
+        "command": "vscode-openpgp.importClipboardKey",
+        "title": "Import Key from Clipboard",
+        "icon": "$(clippy)"
       },
       {
         "command": "vscode-openpgp.removeKey",
@@ -120,7 +120,7 @@
           "group": "navigation"
         },
         {
-          "command": "vscode-openpgp.importKey",
+          "command": "vscode-openpgp.importClipboardKey",
           "when": "view == vscode-openpgp.publicKeysView",
           "group": "navigation"
         }
