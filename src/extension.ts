@@ -29,8 +29,6 @@ export class OutlineProvider
     return treeitem;
   }
 
-  
-
   getChildren(element?: any): Thenable<[]> {
     if (element) {
       return Promise.resolve(element.children);
@@ -232,7 +230,7 @@ export function activate(context: vscode.ExtensionContext) {
         const encryptedMessage:openpgp.message.Message = await openpgp.message.readArmored(encryptedText);
 
         let privateKeyArmored = await getMatchingPrivateKey(encryptedMessage);
-        //console.info(privateKeyArmored?.getUserIds());
+        
         if(privateKeyArmored === null){
           privateKeyArmored = await pickPrivateKey();
         }else{

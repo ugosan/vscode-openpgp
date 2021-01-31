@@ -138,11 +138,6 @@
       ],
       "view/item/context": [
         {
-          "command": "vscode-openpgp.publishKey",
-          "when": "viewItem == publicKey",
-          "group": "inline"
-        },
-        {
           "command": "vscode-openpgp.removeKey",
           "when": "viewItem == privateKey || viewItem == publicKey",
           "group": "inline"
