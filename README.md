@@ -1,4 +1,4 @@
-# vscode-openpgp README
+# OpenPGP Encryption for VSCode
 
 This extensions implements OpenPGP in VSCode, allowing you to encrypt and decrypt files using public and private keys.
 
