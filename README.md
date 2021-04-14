@@ -4,10 +4,11 @@ This extensions implements OpenPGP in VSCode, allowing you to encrypt and decryp
 
 ## Features
 
-- No external dependencies: you don't have to install gpg on your machine in order to use this extension.
-- Create Private Keys
+- No system's dependencies!
 - Encrypt with public keys
 - Decrypt with private key
+- Create private keys
+- Import public keys
 - Automatic selection of a matching private key based the encrypted message's signature
 
 ![VSCode OpenPGP](images/vscode-openpgp.gif)
