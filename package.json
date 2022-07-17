@@ -176,6 +176,6 @@
     "typescript": "^3.8.3"
   },
   "dependencies": {
-    "openpgp": "^5.1.0"
+    "openpgp": "^5.3.1"
   }
 }
