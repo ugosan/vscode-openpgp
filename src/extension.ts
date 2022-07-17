@@ -6,7 +6,6 @@ import { window } from 'vscode';
 const os = require('os');
 
 
-
 export class OutlineProvider
   implements vscode.TreeDataProvider<any> {
   constructor(private outline: any) {
@@ -54,7 +53,8 @@ export function activate(context: vscode.ExtensionContext) {
 
       const { privateKey, publicKey, revocationCertificate } = await openpgp.generateKey({
         userIDs: [{ name: inputs.name, email: inputs.email }],
-        curve: 'ed25519',
+        type: 'ecc', // Type of the key, defaults to ECC
+        curve: 'curve25519', // ECC curve name, defaults to curve25519
         passphrase: inputs.passphrase
       });
 
@@ -386,7 +386,7 @@ async function pickPublicKey() {
 
 async function encryptWithPublicKey(text: string, publicKey: openpgp.Key) {
 
-  openpgp.config.commentString = "https://openpgpjs.org\nComment: Encrypted using vscode-openpgp (http://vscode-openpgp.ugosan.org)";
+  openpgp.config.commentString = "https://openpgpjs.org\nComment: http://vscode-openpgp.ugosan.org";
   openpgp.config.showComment = true;
 
 
