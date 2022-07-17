@@ -82,6 +82,9 @@ export function activate(context: vscode.ExtensionContext) {
 
       const fullText = vscode.window.activeTextEditor!.document.getText();
       const publicKey = await pickPublicKey();
+      if(publicKey == null){
+        return;
+      }
       const encrypted = await encryptWithPublicKey(fullText, publicKey);
       replaceCurrentEditorContent(encrypted);
 
@@ -369,6 +372,16 @@ async function getPrivateKeys() {
 async function pickPublicKey() {
 
   const keys = await getPublicKeys();
+
+  if (keys.length == 0){
+    vscode.window.showErrorMessage(
+      'No keys were found in your keys folder! \n Generate a new key pair or import existing public keys.', 
+      {
+        "modal": true
+      }
+    );
+    return;
+  }
 
   const keyList: vscode.QuickPickItem[] = keys.map((key, i) => {
     return {
