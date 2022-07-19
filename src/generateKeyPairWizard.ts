@@ -1,9 +1,21 @@
 import { QuickPickItem, window, Disposable, CancellationToken, QuickInputButton, QuickInput, ExtensionContext, QuickInputButtons, Uri } from 'vscode';
 
-export async function collectNewPrivateKey(){
+export async function collectNewKeyPair(){
     const state = {} as Partial<State>;
     await MultiStepInput.run(input => inputName(input, state));
     return state as State;
+}
+
+const CURVES = {
+  'P-256': 'p256',
+  'P-384': 'p384',
+  'P-521': 'p521',
+  'SECP256K1': 'secp256k1',
+  'ED25519': 'ed25519',
+  'Curve25519': 'curve25519',
+  'brainpoolP256r1': 'brainpoolP256r1',
+  'brainpoolP384r1': 'brainpoolP384r1',
+  'brainpoolP512r1': 'brainpoolP512r1'
 }
 
 interface State {

@@ -1,16 +1,16 @@
 import * as vscode from 'vscode';
 import * as openpgp from 'openpgp';
 import { posix } from 'path';
-import { collectNewPrivateKey } from './multiStepInput';
+import { collectNewKeyPair } from './generateKeyPairWizard';
 import { window } from 'vscode';
+
 const os = require('os');
 
 
 export class OutlineProvider
   implements vscode.TreeDataProvider<any> {
-  constructor(private outline: any) {
-    //console.log(outline);
-  }
+
+  constructor(private outline: any) { }
 
   getTreeItem(item: any): vscode.TreeItem {
     let treeitem = new vscode.TreeItem(
@@ -49,12 +49,12 @@ export function activate(context: vscode.ExtensionContext) {
       const folderUri = getKeysFolderUri();
       await vscode.workspace.fs.createDirectory(folderUri);
 
-      const inputs = await collectNewPrivateKey();
+      const inputs = await collectNewKeyPair();
 
       const { privateKey, publicKey, revocationCertificate } = await openpgp.generateKey({
         userIDs: [{ name: inputs.name, email: inputs.email }],
-        type: 'ecc', // Type of the key, defaults to ECC
-        curve: 'curve25519', // ECC curve name, defaults to curve25519
+        type: 'ecc',
+        curve: 'curve25519',
         passphrase: inputs.passphrase
       });
 
@@ -82,7 +82,7 @@ export function activate(context: vscode.ExtensionContext) {
 
       const fullText = vscode.window.activeTextEditor!.document.getText();
       const publicKey = await pickPublicKey();
-      if(publicKey == null){
+      if (publicKey == null) {
         return;
       }
       const encrypted = await encryptWithPublicKey(fullText, publicKey);
@@ -92,7 +92,7 @@ export function activate(context: vscode.ExtensionContext) {
   }));
 
   context.subscriptions.push(vscode.commands.registerCommand('vscode-openpgp.openKey', (e) => {
-    console.info(e);
+
     if (e.path) {
       var openPath = vscode.Uri.file(e.path.path);
       vscode.workspace.openTextDocument(openPath).then(doc => {
@@ -101,10 +101,7 @@ export function activate(context: vscode.ExtensionContext) {
     }
   }));
 
-  context.subscriptions.push(vscode.commands.registerCommand('vscode-openpgp.importKey', (e) => {
-
-
-  }));
+  context.subscriptions.push(vscode.commands.registerCommand('vscode-openpgp.importKey', (e) => { }));
 
   context.subscriptions.push(vscode.commands.registerCommand('vscode-openpgp.importClipboardKey', (e) => {
 
@@ -112,9 +109,9 @@ export function activate(context: vscode.ExtensionContext) {
 
       let clipboard_content = await vscode.env.clipboard.readText();
 
-      try{
+      try {
         const key = await openpgp.readKey({ armoredKey: clipboard_content });
-        
+
         const folderUri = getKeysFolderUri();
         await vscode.workspace.fs.createDirectory(folderUri);
 
@@ -122,7 +119,7 @@ export function activate(context: vscode.ExtensionContext) {
         await vscode.workspace.fs.writeFile(fileUri, Buffer.from(clipboard_content, 'utf8'));
 
         refreshActivityBar();
-      }catch (error) {
+      } catch (error) {
         vscode.window.showErrorMessage('' + error);
         return;
       }
@@ -130,9 +127,7 @@ export function activate(context: vscode.ExtensionContext) {
     })();
   }));
 
-  context.subscriptions.push(vscode.commands.registerCommand('vscode-openpgp.publishKey', (e) => {
-
-  }));
+  context.subscriptions.push(vscode.commands.registerCommand('vscode-openpgp.publishKey', (e) => { }));
 
   context.subscriptions.push(vscode.commands.registerCommand('vscode-openpgp.refreshKeys', (e) => {
     refreshActivityBar();
@@ -214,15 +209,15 @@ export function activate(context: vscode.ExtensionContext) {
             message: message,
             decryptionKeys: [privateKey]
           });
-  
+
           replaceCurrentEditorContent(decrypted);
-        }else{
+        } else {
           let privateKey = await openpgp.readPrivateKey({ armoredKey: privateKeyArmored.armor() });
           const { data: decrypted } = await openpgp.decrypt({
             message: message,
             decryptionKeys: [privateKey]
           });
-  
+
           replaceCurrentEditorContent(decrypted);
         }
 
@@ -236,7 +231,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 }
 
-// this method is called when your extension is deactivated
 export function deactivate() { }
 
 async function refreshActivityBar() {
@@ -289,7 +283,6 @@ async function refreshActivityBar() {
     "vscode-openpgp.publicKeysView",
     new OutlineProvider(publicKeyList)
   );
-
 
 }
 
@@ -355,10 +348,8 @@ async function getPrivateKeys() {
     const readData = await vscode.workspace.fs.readFile(fileUri);
     const readStr = Buffer.from(readData).toString('utf8');
 
-    //console.info(`reading ${element}`);
     const key = await openpgp.readKey({ armoredKey: readStr });
 
-    //console.info('key: ', key);
     if (key.isPrivate()) {
       keys.push(key);
     }
@@ -373,9 +364,9 @@ async function pickPublicKey() {
 
   const keys = await getPublicKeys();
 
-  if (keys.length == 0){
+  if (keys.length == 0) {
     vscode.window.showErrorMessage(
-      'No keys were found in your keys folder! \n Generate a new key pair or import existing public keys.', 
+      'No keys were found in your keys folder! \n Generate a new key pair or import existing public keys.',
       {
         "modal": true
       }
