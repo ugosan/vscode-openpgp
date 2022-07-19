@@ -3,7 +3,6 @@ import * as openpgp from 'openpgp';
 import { posix } from 'path';
 import { collectNewKeyPair } from './generateKeyPairWizard';
 import { window } from 'vscode';
-
 const os = require('os');
 
 
@@ -51,21 +50,33 @@ export function activate(context: vscode.ExtensionContext) {
 
       const inputs = await collectNewKeyPair();
 
-      const { privateKey, publicKey, revocationCertificate } = await openpgp.generateKey({
-        userIDs: [{ name: inputs.name, email: inputs.email }],
-        type: 'ecc',
-        curve: 'curve25519',
-        passphrase: inputs.passphrase
-      });
+      try {
+        const { privateKey, publicKey, revocationCertificate } = await openpgp.generateKey({
+          userIDs: [{ name: inputs.name, email: inputs.email }],
+          type: 'ecc',
+          curve: <openpgp.EllipticCurveName>inputs.curve.label,
+          passphrase: inputs.passphrase
+        });
 
-      const filename = [inputs.name.replace(' ', ''), inputs.email, inputs.comment];
-      let fileUri = folderUri.with({ path: posix.join(folderUri.path, filename.join('_') + '.key') });
-      await vscode.workspace.fs.writeFile(fileUri, Buffer.from(privateKey, 'utf8'));
-      vscode.window.showInformationMessage(`Private key generated to ${fileUri}`);
-      fileUri = folderUri.with({ path: posix.join(folderUri.path, filename.join('_') + '.pub') });
-      await vscode.workspace.fs.writeFile(fileUri, Buffer.from(publicKey, 'utf8'));
+        const filename = [inputs.name.replace(' ', ''), inputs.email, inputs.comment];
+        let fileUri = folderUri.with({ path: posix.join(folderUri.path, filename.join('_') + '.key') });
+        await vscode.workspace.fs.writeFile(fileUri, Buffer.from(privateKey, 'utf8'));
+        fileUri = folderUri.with({ path: posix.join(folderUri.path, filename.join('_') + '.pub') });
+        await vscode.workspace.fs.writeFile(fileUri, Buffer.from(publicKey, 'utf8'));
+        
+        //TODO: actually write the revokation certificate 
+        //fileUri = folderUri.with({ path: posix.join(folderUri.path, filename.join('_') + '.revoke') });
+        //await vscode.workspace.fs.writeFile(fileUri, Buffer.from(revocationCertificate, 'utf8'));
 
-      refreshActivityBar();
+        vscode.window.showInformationMessage(
+          `Private key generated to ${fileUri}`
+        );
+
+        refreshActivityBar();
+      } catch (error) {
+        vscode.window.showErrorMessage('' + error);
+        return;
+      }
     })();
   }));
 
@@ -296,13 +307,19 @@ async function getKeys() {
   for await (let element of keys_folder) {
 
     const fileUri = folderUri.with({ path: posix.join(folderUri.path, element[0]) });
-    const readData = await vscode.workspace.fs.readFile(fileUri);
+    console.debug(fileUri);
+    try {
+      const readData = await vscode.workspace.fs.readFile(fileUri);
 
-    const readStr = Buffer.from(readData).toString('utf8');
+      const readStr = Buffer.from(readData).toString('utf8');
 
-    const key = await openpgp.readKey({ armoredKey: readStr });
 
-    allKeys.push({ key: key.getKeys()[0], filePath: fileUri });
+      const key = await openpgp.readKey({ armoredKey: readStr });
+
+      allKeys.push({ key: key.getKeys()[0], filePath: fileUri });
+    } catch (error) {
+      vscode.window.showErrorMessage('' + error);
+    }
 
   }
 
@@ -317,16 +334,23 @@ async function getPublicKeys() {
   let keys: openpgp.Key[] = [];
 
   for await (let element of keys_folder) {
-
     const fileUri = folderUri.with({ path: posix.join(folderUri.path, element[0]) });
-    const readData = await vscode.workspace.fs.readFile(fileUri);
 
-    const readStr = Buffer.from(readData).toString('utf8');
+    try {
+      
+      const readData = await vscode.workspace.fs.readFile(fileUri);
 
-    const key = await openpgp.readKey({ armoredKey: readStr });
+      const readStr = Buffer.from(readData).toString('utf8');
 
-    if (!key.isPrivate()) {
-      keys.push(key);
+      const key = await openpgp.readKey({ armoredKey: readStr });
+
+      if (!key.isPrivate()) {
+        keys.push(key);
+      }
+    } catch (error) {
+      vscode.window.showErrorMessage(
+       error + '' +fileUri, ['a', 'b']
+      );
     }
 
   }
@@ -344,14 +368,19 @@ async function getPrivateKeys() {
 
   for await (let element of keys_folder) {
 
-    const fileUri = folderUri.with({ path: posix.join(folderUri.path, element[0]) });
-    const readData = await vscode.workspace.fs.readFile(fileUri);
-    const readStr = Buffer.from(readData).toString('utf8');
+    try {
 
-    const key = await openpgp.readKey({ armoredKey: readStr });
+      const fileUri = folderUri.with({ path: posix.join(folderUri.path, element[0]) });
+      const readData = await vscode.workspace.fs.readFile(fileUri);
+      const readStr = Buffer.from(readData).toString('utf8');
 
-    if (key.isPrivate()) {
-      keys.push(key);
+      const key = await openpgp.readKey({ armoredKey: readStr });
+
+      if (key.isPrivate()) {
+        keys.push(key);
+      }
+    } catch (error) {
+      vscode.window.showErrorMessage('' + error);
     }
   }
 
@@ -392,7 +421,6 @@ async function encryptWithPublicKey(text: string, publicKey: openpgp.Key) {
 
   openpgp.config.commentString = "https://openpgpjs.org\nComment: http://vscode-openpgp.ugosan.org";
   openpgp.config.showComment = true;
-
 
   let encrypted = await openpgp.encrypt({
     message: await openpgp.createMessage({ text: text }),
